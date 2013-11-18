@@ -5,7 +5,9 @@ def get_compile_cmd_str(src, obj, compiler='gcc', defs=[], includes=[], flags=[]
     cmd_args = [compiler]
     cmd_args += ['-D'+d for d in defs]
     cmd_args += ['-I'+i for i in includes]
-    cmd_args += flags + ['-c']
+    cmd_args += flags
+    if '-c' not in cmd_args:
+        cmd_args += ['-c']
     cmd_args += ['-o', obj]
     cmd_args += [src]
     return _arg_list_to_command_string(cmd_args)

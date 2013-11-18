@@ -1,0 +1,201 @@
+import os
+import gcc_utils
+import file_utils
+from doit.tools import create_folder
+
+
+C_FLAGS = [
+    '-c',
+    '-g',
+    '-Os',
+    '-Wall',
+    '-ffunction-sections',
+    '-fdata-sections',
+    '-mmcu=atmega328p',
+    '-MMD',
+]
+
+C_DEFS = [
+    'F_CPU=16000000L',
+    'USB_VID=null',
+    'USB_PID=null',
+    'ARDUINO=105',
+]
+
+CPP_FLAGS = C_FLAGS + ['-fno-exceptions']
+
+CPP_DEFS = C_DEFS
+
+LINKER_FLAGS = [
+    '-Os',
+    '-Wl,--gc-sections',
+    '-mmcu=atmega328p',
+]
+
+LINKER_LIBS = [
+    'm'
+]
+
+OBJCOPY_EEPROM_FLAGS = [
+    '-O',
+    'ihex',
+    '-j',
+    '.eeprom',
+    '--set-section-flags=.eeprom=alloc,load',
+    '--no-change-warnings',
+    '--change-section-lma',
+    '.eeprom=0',
+]
+
+OBJCOPY_FLASH_FLAGS = [
+    '-O',
+    'ihex',
+    '-R',
+    '.eeprom',
+]
+
+AVRDUDE_FLAGS = [
+    '-patmega328p',
+    '-carduino',
+    '-b115200',
+    '-D'
+]
+
+
+class ArduinoEnv:
+
+    def __init__(self, arduino_path, build_path):
+        self.build_path = build_path
+        self.root_path = arduino_path
+        self.bin_path = os.path.join(self.root_path, 'hardware', 'tools', 'avr', 'bin')
+        self.core_path = os.path.join(
+            self.root_path, 'hardware', 'arduino', 'cores', 'arduino')
+        self.libs_path = os.path.join(self.root_path, 'libraries')
+
+        self.c_compiler = os.path.join(self.bin_path, 'avr-gcc')
+        self.cpp_compiler = os.path.join(self.bin_path, 'avr-g++')
+        self.linker = os.path.join(self.bin_path, 'avr-gcc')
+        self.archiver = os.path.join(self.bin_path, 'avr-ar')
+        self.objcopy = os.path.join(self.bin_path, 'avr-objcopy')
+        self.avrdude = os.path.join(self.bin_path, 'avrdude')
+
+        self.avrdude_conf = os.path.join(
+            self.root_path, 'hardware', 'tools', 'avr', 'etc', 'avrdude.conf')
+
+        self.cflags = C_FLAGS
+        self.cdefs = C_DEFS
+        self.cincludes = [
+            self.core_path,
+            os.path.join(
+                self.root_path, 'hardware', 'arduino', 'variants', 'standard')
+        ]
+        self.cppflags = CPP_FLAGS
+        self.cppdefs = CPP_DEFS
+        self.cppincludes = self.cincludes
+
+        self.core_csources = file_utils.find(self.core_path, '*.c')
+        self.core_cppsources = file_utils.find(self.core_path, '*.cpp')
+
+        self.core_lib_output_dir = os.path.join(
+            self.build_path, '_arduino_core_')
+        self.core_obj_output_dir = os.path.join(
+            self.core_lib_output_dir, 'obj')
+        self.core_lib_output_path = os.path.join(
+            self.core_lib_output_dir, 'core.a')
+
+        self.core_objs = [self._source_to_obj_path(x)
+                          for x in self.core_csources + self.core_cppsources]
+
+        self._set_core_deps()
+
+    # -------------------------------------------------------------------
+    # public
+
+    def get_build_core_tasks(self):
+        tasks = self._get_compile_core_c_tasks()
+        tasks += self._get_compile_core_cpp_tasks()
+        tasks += self._get_archive_core_objs_tasks()
+        return tasks
+
+    def get_avrdude_command(self, serial_port):
+        avrdude_flags = AVRDUDE_FLAGS + \
+            ['-C' + self.avrdude_conf] + ['-P' + serial_port]
+        return ' '.join([self.avrdude] + avrdude_flags)
+
+    # -------------------------------------------------------------------
+    # private
+
+    def _source_to_obj_path(self, source):
+        src_filename = os.path.basename(source)
+        return os.path.join(self.core_obj_output_dir, src_filename) + '.o'
+
+    def _set_core_deps(self):
+        if os.path.exists(self.core_obj_output_dir):
+            self.deps = gcc_utils.get_dependency_dict(self.core_obj_output_dir)
+        else:
+            self.deps = {}
+
+    def _get_core_obj_deps(self, obj_path):
+        if obj_path in self.deps:
+            return self.deps[obj_path]
+        else:
+            return []
+
+    def _get_compile_core_c_tasks(self):
+        tasks = []
+        for source in self.core_csources:
+            obj = self._source_to_obj_path(source)
+            tasks.append({
+                'name': obj,
+                'actions': [(create_folder, [self.core_obj_output_dir]),
+                            gcc_utils.get_compile_cmd_str(
+                                source, obj,
+                                compiler=self.c_compiler,
+                                defs=self.cdefs,
+                                includes=self.cincludes,
+                                flags=self.cflags)],
+                'targets': [obj],
+                'clean': True
+            })
+        return tasks
+
+    def _get_compile_core_cpp_tasks(self):
+        tasks = []
+        for source in self.core_cppsources:
+            obj = self._source_to_obj_path(source)
+            tasks.append({
+                'name': obj,
+                'actions': [(create_folder, [self.core_obj_output_dir]),
+                            gcc_utils.get_compile_cmd_str(
+                                source, obj,
+                                compiler=self.cpp_compiler,
+                                defs=self.cppdefs,
+                                includes=self.cppincludes,
+                                flags=self.cppflags)],
+                'targets': [obj],
+                'clean': True
+            })
+        return tasks
+
+    def _get_archive_core_objs_tasks(self):
+        archive_command = self.archiver + ' rcs ' + self.core_lib_output_path + ' '
+        archive_command += ' '.join(self.core_objs)
+        return [{
+            'name': 'archiving core',
+            'actions': [archive_command],
+            'targets': [self.core_lib_output_path],
+            'file_dep': self.core_objs,
+            'clean': True
+        }]
+
+    def __str__(self):
+        out_str = ''
+        for key in dir(self):
+            out_str += str(key) + ':\n'
+            attr = getattr(self, key)
+            if not hasattr(attr, '__iter__') or type(attr) is str:
+                out_str += '    ' + str(attr) + '\n'
+            else:
+                for item in attr:
+                    out_str += '    ' + str(item) + '\n'
+        return out_str
