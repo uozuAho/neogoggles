@@ -51,3 +51,8 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+#----------------------------------------
+# doit ignores
+
+.doit.db

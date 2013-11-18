@@ -1,0 +1,6 @@
+todo
+====
+
+- Remove arduino core - get from arduino dir
+- Remove neopixel lib - get from arduino dir
+- Change license to MIT
