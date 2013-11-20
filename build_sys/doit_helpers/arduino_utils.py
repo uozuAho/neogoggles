@@ -32,10 +32,6 @@ LINKER_FLAGS = [
     '-mmcu=atmega328p',
 ]
 
-LINKER_LIBS = [
-    'm'
-]
-
 OBJCOPY_EEPROM_FLAGS = [
     '-O',
     'ihex',
@@ -129,6 +125,10 @@ class ArduinoEnv:
         src_filename = os.path.basename(source)
         return os.path.join(self.core_obj_output_dir, src_filename) + '.o'
 
+    def _source_to_dep_path(self, source):
+        src_filename = os.path.basename(source)
+        return os.path.join(self.core_obj_output_dir, src_filename) + '.d'
+
     def _set_core_deps(self):
         if os.path.exists(self.core_obj_output_dir):
             self.deps = gcc_utils.get_dependency_dict(self.core_obj_output_dir)
@@ -145,6 +145,7 @@ class ArduinoEnv:
         tasks = []
         for source in self.core_csources:
             obj = self._source_to_obj_path(source)
+            dep = self._source_to_dep_path(source)
             tasks.append({
                 'name': obj,
                 'actions': [(create_folder, [self.core_obj_output_dir]),
@@ -154,7 +155,8 @@ class ArduinoEnv:
                                 defs=self.cdefs,
                                 includes=self.cincludes,
                                 flags=self.cflags)],
-                'targets': [obj],
+                'targets': [obj, dep],
+                'file_dep': self._get_core_obj_deps(obj),
                 'clean': True
             })
         return tasks
@@ -163,6 +165,7 @@ class ArduinoEnv:
         tasks = []
         for source in self.core_cppsources:
             obj = self._source_to_obj_path(source)
+            dep = self._source_to_dep_path(source)
             tasks.append({
                 'name': obj,
                 'actions': [(create_folder, [self.core_obj_output_dir]),
@@ -172,7 +175,8 @@ class ArduinoEnv:
                                 defs=self.cppdefs,
                                 includes=self.cppincludes,
                                 flags=self.cppflags)],
-                'targets': [obj],
+                'targets': [obj, dep],
+                'file_dep': self._get_core_obj_deps(obj),
                 'clean': True
             })
         return tasks
