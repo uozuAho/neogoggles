@@ -4,6 +4,8 @@ from build_sys.doit_helpers import arduino_utils
 from build_sys.doit_helpers import file_utils
 from build_sys.doit_helpers import gcc_utils
 
+DOIT_CONFIG = {'default_tasks': ['build_exe']}
+
 # ---------------------------------------------------------------------
 # Build settings
 
@@ -15,7 +17,9 @@ OBJ_DIR = os.path.join(BUILD_DIR, 'obj')
 
 ARDUINO_ROOT = 'D:\\programs_win\\arduino-1.0.5'
 
-ARDUINO_ENV = arduino_utils.ArduinoEnv(ARDUINO_ROOT, BUILD_DIR)
+ARDUINO_ENV = arduino_utils.ArduinoEnv(PROJECT_NAME, ARDUINO_ROOT, BUILD_DIR)
+
+SERIAL_PORT = 'COM5'
 
 SOURCE_DIRS = [
     'src',
@@ -120,6 +124,10 @@ def task_compile_cpp():
 def task_build_exe():
     for task in ARDUINO_ENV.get_build_exe_tasks(PROJECT_NAME, build_data.objs):
         yield task
+
+
+def task_upload():
+    return ARDUINO_ENV.get_upload_task(SERIAL_PORT)
 
 
 if __name__ == '__main__':

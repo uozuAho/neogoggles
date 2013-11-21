@@ -64,7 +64,8 @@ AVRDUDE_FLAGS = [
 
 class ArduinoEnv:
 
-    def __init__(self, arduino_path, build_dir):
+    def __init__(self, proj_name, arduino_path, build_dir):
+        self.proj_name = proj_name
         self.build_dir = build_dir
         self.root_path = arduino_path
         self.bin_path = os.path.join(
@@ -113,6 +114,10 @@ class ArduinoEnv:
 
         self._set_core_deps()
 
+        self.elf_target = os.path.join(self.build_dir, self.proj_name + '.elf')
+        self.eep_target = os.path.join(self.build_dir, self.proj_name + '.eep')
+        self.hex_target = os.path.join(self.build_dir, self.proj_name + '.hex')
+
     # -------------------------------------------------------------------
     # public
 
@@ -123,20 +128,24 @@ class ArduinoEnv:
         return tasks
 
     def get_build_exe_tasks(self, name, objs):
-        elf_target = os.path.join(self.build_dir, name + '.elf')
-        eep_target = os.path.join(self.build_dir, name + '.eep')
-        hex_target = os.path.join(self.build_dir, name + '.hex')
-
-        tasks = self._get_build_elf_tasks(objs, elf_target)
-        tasks += self._get_build_eeprom_binary_tasks(elf_target, eep_target)
-        tasks += self._get_build_flash_binary_tasks(elf_target, hex_target)
-        tasks += self._get_print_size_task(elf_target)
+        tasks = self._get_build_elf_tasks(objs, self.elf_target)
+        tasks += self._get_build_eeprom_binary_tasks(self.elf_target, self.eep_target)
+        tasks += self._get_build_flash_binary_tasks(self.elf_target, self.hex_target)
+        tasks += self._get_print_size_task(self.elf_target)
         return tasks
 
-    def get_avrdude_command(self, serial_port):
-        avrdude_flags = AVRDUDE_FLAGS + \
-            ['-C' + self.avrdude_conf] + ['-P' + serial_port]
-        return ' '.join([self.avrdude] + avrdude_flags)
+    def get_upload_task(self, serial_port):
+        avrdude_flags = AVRDUDE_FLAGS
+        avrdude_flags += ['-C' + self.avrdude_conf] + ['-P' + serial_port]
+        avrdude_flags += ['-Uflash:w:' + self.hex_target + ':i']
+        avrdude_cmd = ' '.join([self.avrdude] + avrdude_flags)
+        return {
+            'actions': [avrdude_cmd],
+            'file_dep': [self.hex_target],
+            # dummy target so this always runs
+            'targets': ['upload'],
+            'verbosity': 2
+        }
 
     # -------------------------------------------------------------------
     # private
@@ -252,7 +261,6 @@ class ArduinoEnv:
             # dummy target makes this always run
             'targets': ['print size'],
             'verbosity': 2,
-            'clean': True
         }]
 
     def __str__(self):
