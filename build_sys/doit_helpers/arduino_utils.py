@@ -32,6 +32,10 @@ LINKER_FLAGS = [
     '-mmcu=atmega328p',
 ]
 
+LINKER_LIBS = [
+    'm'
+]
+
 OBJCOPY_EEPROM_FLAGS = [
     '-O',
     'ihex',
@@ -60,19 +64,21 @@ AVRDUDE_FLAGS = [
 
 class ArduinoEnv:
 
-    def __init__(self, arduino_path, build_path):
-        self.build_path = build_path
+    def __init__(self, arduino_path, build_dir):
+        self.build_dir = build_dir
         self.root_path = arduino_path
-        self.bin_path = os.path.join(self.root_path, 'hardware', 'tools', 'avr', 'bin')
+        self.bin_path = os.path.join(
+            self.root_path, 'hardware', 'tools', 'avr', 'bin')
         self.core_path = os.path.join(
             self.root_path, 'hardware', 'arduino', 'cores', 'arduino')
-        self.libs_path = os.path.join(self.root_path, 'libraries')
+        self.libraries_path = os.path.join(self.root_path, 'libraries')
 
         self.c_compiler = os.path.join(self.bin_path, 'avr-gcc')
         self.cpp_compiler = os.path.join(self.bin_path, 'avr-g++')
         self.linker = os.path.join(self.bin_path, 'avr-gcc')
         self.archiver = os.path.join(self.bin_path, 'avr-ar')
         self.objcopy = os.path.join(self.bin_path, 'avr-objcopy')
+        self.print_size = os.path.join(self.bin_path, 'avr-size')
         self.avrdude = os.path.join(self.bin_path, 'avrdude')
 
         self.avrdude_conf = os.path.join(
@@ -88,12 +94,15 @@ class ArduinoEnv:
         self.cppflags = CPP_FLAGS
         self.cppdefs = CPP_DEFS
         self.cppincludes = self.cincludes
+        self.ldflags = LINKER_FLAGS
+        self.ldlibs = LINKER_LIBS
+        self.ldincludes = []
 
         self.core_csources = file_utils.find(self.core_path, '*.c')
         self.core_cppsources = file_utils.find(self.core_path, '*.cpp')
 
         self.core_lib_output_dir = os.path.join(
-            self.build_path, '_arduino_core_')
+            self.build_dir, '_arduino_core_')
         self.core_obj_output_dir = os.path.join(
             self.core_lib_output_dir, 'obj')
         self.core_lib_output_path = os.path.join(
@@ -111,6 +120,17 @@ class ArduinoEnv:
         tasks = self._get_compile_core_c_tasks()
         tasks += self._get_compile_core_cpp_tasks()
         tasks += self._get_archive_core_objs_tasks()
+        return tasks
+
+    def get_build_exe_tasks(self, name, objs):
+        elf_target = os.path.join(self.build_dir, name + '.elf')
+        eep_target = os.path.join(self.build_dir, name + '.eep')
+        hex_target = os.path.join(self.build_dir, name + '.hex')
+
+        tasks = self._get_build_elf_tasks(objs, elf_target)
+        tasks += self._get_build_eeprom_binary_tasks(elf_target, eep_target)
+        tasks += self._get_build_flash_binary_tasks(elf_target, hex_target)
+        tasks += self._get_print_size_task(elf_target)
         return tasks
 
     def get_avrdude_command(self, serial_port):
@@ -149,12 +169,11 @@ class ArduinoEnv:
             tasks.append({
                 'name': obj,
                 'actions': [(create_folder, [self.core_obj_output_dir]),
-                            gcc_utils.get_compile_cmd_str(
-                                source, obj,
-                                compiler=self.c_compiler,
-                                defs=self.cdefs,
-                                includes=self.cincludes,
-                                flags=self.cflags)],
+                            gcc_utils.get_compile_cmd_str(source, obj,
+                                                          compiler=self.c_compiler,
+                                                          defs=self.cdefs,
+                                                          includes=self.cincludes,
+                                                          flags=self.cflags)],
                 'targets': [obj, dep],
                 'file_dep': self._get_core_obj_deps(obj),
                 'clean': True
@@ -169,12 +188,11 @@ class ArduinoEnv:
             tasks.append({
                 'name': obj,
                 'actions': [(create_folder, [self.core_obj_output_dir]),
-                            gcc_utils.get_compile_cmd_str(
-                                source, obj,
-                                compiler=self.cpp_compiler,
-                                defs=self.cppdefs,
-                                includes=self.cppincludes,
-                                flags=self.cppflags)],
+                            gcc_utils.get_compile_cmd_str(source, obj,
+                                                          compiler=self.cpp_compiler,
+                                                          defs=self.cppdefs,
+                                                          includes=self.cppincludes,
+                                                          flags=self.cppflags)],
                 'targets': [obj, dep],
                 'file_dep': self._get_core_obj_deps(obj),
                 'clean': True
@@ -182,13 +200,58 @@ class ArduinoEnv:
         return tasks
 
     def _get_archive_core_objs_tasks(self):
-        archive_command = self.archiver + ' rcs ' + self.core_lib_output_path + ' '
+        archive_command = self.archiver + \
+            ' rcs ' + self.core_lib_output_path + ' '
         archive_command += ' '.join(self.core_objs)
         return [{
             'name': 'archiving core',
             'actions': [archive_command],
             'targets': [self.core_lib_output_path],
             'file_dep': self.core_objs,
+            'clean': True
+        }]
+
+    def _get_build_elf_tasks(self, objs, dest):
+        return [{
+            'name': dest,
+            'actions': [gcc_utils.get_link_cmd_str(dest, objs,
+                                                   linker=self.linker,
+                                                   libdirs=self.ldincludes,
+                                                   libs=self.ldlibs,
+                                                   flags=self.ldflags)],
+            'file_dep': objs,
+            'targets': [dest],
+            'clean': True
+        }]
+
+    def _get_build_eeprom_binary_tasks(self, source, dest):
+        objcopy_cmd = ' '.join([self.objcopy] + OBJCOPY_EEPROM_FLAGS + [source, dest])
+        return [{
+            'name': dest,
+            'actions': [objcopy_cmd],
+            'file_dep': [source],
+            'targets': [dest],
+            'clean': True
+        }]
+
+    def _get_build_flash_binary_tasks(self, source, dest):
+        objcopy_cmd = ' '.join([self.objcopy] + OBJCOPY_FLASH_FLAGS + [source, dest])
+        return [{
+            'name': dest,
+            'actions': [objcopy_cmd],
+            'file_dep': [source],
+            'targets': [dest],
+            'clean': True
+        }]
+
+    def _get_print_size_task(self, binary):
+        return [{
+            'name': 'size',
+            'actions': [self.print_size + ' ' + binary],
+            'file_dep': [binary],
+            # dummy target makes this always run
+            'targets': ['print size'],
+            'verbosity': 2,
             'clean': True
         }]
 
