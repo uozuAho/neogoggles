@@ -42,7 +42,7 @@ class BuildData:
         self.cpp_sources = []
         for path in SOURCE_DIRS:
             self.c_sources += file_utils.find(path, '*.c')
-            self.cpp_sources += file_utils.find(path, '*.cpp')
+            self.cpp_sources += file_utils.find(path, ['*.cpp', '*.ino'])
 
         self.objs = [self.get_obj_path(x) for x in self.c_sources + self.cpp_sources]
         self.objs += [ARDUINO_ENV.core_lib_output_path]

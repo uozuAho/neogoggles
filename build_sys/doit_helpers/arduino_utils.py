@@ -3,8 +3,7 @@ import gcc_utils
 import file_utils
 from doit.tools import create_folder
 
-
-C_FLAGS = [
+COMMON_COMPILE_FLAGS = [
     '-c',
     '-g',
     '-Os',
@@ -15,6 +14,10 @@ C_FLAGS = [
     '-MMD',
 ]
 
+C_FLAGS = COMMON_COMPILE_FLAGS + [
+    '-x c',     # ensure c files are processed as c files!
+]
+
 C_DEFS = [
     'F_CPU=16000000L',
     'USB_VID=null',
@@ -22,7 +25,10 @@ C_DEFS = [
     'ARDUINO=105',
 ]
 
-CPP_FLAGS = C_FLAGS + ['-fno-exceptions']
+CPP_FLAGS = COMMON_COMPILE_FLAGS + [
+    '-fno-exceptions',
+    '-x c++',     # stops .ino files being processed as objects
+]
 
 CPP_DEFS = C_DEFS
 
