@@ -1,0 +1,6 @@
+[submodule "dependencies/doit_helpers"]
+	path = dependencies/doit_helpers
+	url = https://github.com/uozuAho/doit_helpers
+[submodule "dependencies/neopixel"]
+	path = dependencies/neopixel
+	url = https://github.com/uozuAho/Adafruit_NeoPixel
