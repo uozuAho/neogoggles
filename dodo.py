@@ -23,12 +23,12 @@ SERIAL_PORT = 'COM5'
 
 SOURCE_DIRS = [
     'src',
-    os.path.join(ARDUINO_ENV.libraries_path, 'Adafruit_NeoPixel')
+    os.path.join('dependencies', 'neopixel')
 ]
 
 INCLUDE_DIRS = [
     'src',
-    os.path.join(ARDUINO_ENV.libraries_path, 'Adafruit_NeoPixel')
+    os.path.join('dependencies', 'neopixel')
 ]
 INCLUDE_DIRS += ARDUINO_ENV.cincludes
 

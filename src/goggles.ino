@@ -17,8 +17,9 @@ void setup()
 
 void loop()
 {
-    pixels.setPixelColor(TOP_RIGHT, 10, 10, 10);
-    pixels.setPixelColor(TOP_LEFT, 10, 10, 10);
+    PixelBuf* px = pixels.getPixelBuf();
+    px->setPixelColor(TOP_RIGHT, 10, 10, 10);
+    px->setPixelColor(TOP_LEFT, 10, 10, 10);
     pixels.show();
 
     delay(500);
