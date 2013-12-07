@@ -33,11 +33,11 @@ void setup()
     pixels.begin();
 
     PixelBuf& px = pixels.getPixelBuf();
-    px.setMaxBrightness(50);
+    px.setMaxBrightness(30);
 
     spot.u16_pos = 0;
     spot.u16_width = 1;
-    spot.colour.u8_r = 100;
+    spot.colour.u8_r = 50;
     spot.colour.u8_g = 0;
     spot.colour.u8_b = 0;
 }
@@ -46,5 +46,12 @@ void loop()
 {
     left_eye.vRenderSpot(spot, RingView::EXCLUSIVE);
     pixels.show();
+
+    spot.u16_pos += 4096;
+    if (spot.colour.u8_r)
+    {
+        spot.colour.u8_r--;
+        spot.colour.u8_g++;
+    }
     delay(150);
 }
