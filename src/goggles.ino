@@ -1,14 +1,27 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LEDS_PER_EYE                16
-#define NUM_LEDS                    LEDS_PER_EYE * 2
+//--------------------------------------------------------------
+// constants
+
+#define PIXELS_PER_EYE              16
+#define NUM_PIXELS                  PIXELS_PER_EYE * 2
 #define NEO_OUTPUT_PIN              0
 
 #define TOP_RIGHT                   12
 #define TOP_LEFT                    20
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS, NEO_OUTPUT_PIN,
-                                             NEO_GRB + NEO_KHZ800);
+
+//--------------------------------------------------------------
+// data
+
+static Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, NEO_OUTPUT_PIN,
+                                                    NEO_GRB + NEO_KHZ800);
+
+static PixelBuf* neobuf = pixels.getPixelBuf();
+
+
+//--------------------------------------------------------------
+// functions
 
 void setup()
 {
@@ -17,10 +30,14 @@ void setup()
 
 void loop()
 {
-    PixelBuf* px = pixels.getPixelBuf();
-    px->setPixelColor(TOP_RIGHT, 10, 10, 10);
-    px->setPixelColor(TOP_LEFT, 10, 10, 10);
+    static int i = 0;
+
+    i = (i + 1) % PIXELS_PER_EYE;
+
+    neobuf->clear();
+    neobuf->setPixelColor(i, 10, 10, 10);
+    neobuf->setPixelColor(i + PIXELS_PER_EYE, 10, 10, 10);
     pixels.show();
 
-    delay(500);
+    delay(150);
 }

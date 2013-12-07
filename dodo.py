@@ -1,8 +1,12 @@
 import os
+import sys
+
 from doit.tools import create_folder
-from build_sys.doit_helpers import arduino_utils
-from build_sys.doit_helpers import file_utils
-from build_sys.doit_helpers import gcc_utils
+
+sys.path.append('dependencies/doit_helpers')
+from doit_helpers import arduino_utils
+from doit_helpers import file_utils
+from doit_helpers import gcc_utils
 
 DOIT_CONFIG = {'default_tasks': ['build_exe']}
 
