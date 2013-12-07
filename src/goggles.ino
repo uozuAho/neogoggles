@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "ring_view.h"
 #include "spot_model.h"
+#include "background_model.h"
 
 //--------------------------------------------------------------
 // constants
@@ -22,8 +23,7 @@ static Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, NEO_OUTPUT_PIN,
 static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 31, TOP_LEFT);
 static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 15, TOP_RIGHT);
 
-static Spot spot;
-
+static Background bg;
 
 //--------------------------------------------------------------
 // functions
@@ -33,25 +33,32 @@ void setup()
     pixels.begin();
 
     PixelBuf& px = pixels.getPixelBuf();
-    px.setMaxBrightness(30);
+    px.setMaxBrightness(20);
 
-    spot.u16_pos = 0;
-    spot.u16_width = 1;
-    spot.colour.u8_r = 50;
-    spot.colour.u8_g = 0;
-    spot.colour.u8_b = 0;
+    bg.colour.u8_r = 255;
+    bg.brightness = 20;
 }
 
 void loop()
 {
-    left_eye.vRenderSpot(spot, RingView::EXCLUSIVE);
+    static bool increase_brightness = false;
+
+    left_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
+    right_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     pixels.show();
 
-    spot.u16_pos += 4096;
-    if (spot.colour.u8_r)
+    if (increase_brightness)
     {
-        spot.colour.u8_r--;
-        spot.colour.u8_g++;
+        bg.brightness++;
+        if (bg.brightness == 20)
+            increase_brightness = false;
     }
-    delay(150);
+    else
+    {
+        bg.brightness--;
+        if (bg.brightness == 0)
+            increase_brightness = true;
+    }
+
+    delay(33);
 }

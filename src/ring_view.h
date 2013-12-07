@@ -4,6 +4,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "pixel_buf.h"
 #include "spot_model.h"
+#include "background_model.h"
 
 class RingView
 {
@@ -18,8 +19,9 @@ public:
 
     } RenderMode;
 
-    /// Render the given spot model
+    // Model renderers
     void vRenderSpot(Spot&, RenderMode);
+    void vRenderBackground(Background&, RenderMode);
 
 private:
     PixelBuf& pixel_buf;
