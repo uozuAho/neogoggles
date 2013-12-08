@@ -2,6 +2,7 @@
 #include "ring_view.h"
 #include "spot_model.h"
 #include "background_model.h"
+#include "colour_controller.h"
 
 //--------------------------------------------------------------
 // constants
@@ -24,6 +25,8 @@ static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 31, TOP_LEFT);
 static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 15, TOP_RIGHT);
 
 static Background bg;
+static ColourController bg_colour_control = ColourController(bg.colour);
+
 
 //--------------------------------------------------------------
 // functions
@@ -35,30 +38,15 @@ void setup()
     PixelBuf& px = pixels.getPixelBuf();
     px.setMaxBrightness(20);
 
-    bg.colour.u8_r = 255;
-    bg.brightness = 20;
+    bg.brightness = 255;
 }
 
 void loop()
 {
-    static bool increase_brightness = false;
-
+    bg_colour_control.vUpdate(millis());
     left_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     right_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     pixels.show();
-
-    if (increase_brightness)
-    {
-        bg.brightness++;
-        if (bg.brightness == 20)
-            increase_brightness = false;
-    }
-    else
-    {
-        bg.brightness--;
-        if (bg.brightness == 0)
-            increase_brightness = true;
-    }
 
     delay(33);
 }
