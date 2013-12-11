@@ -57,7 +57,7 @@
 </layers>
 <board>
 <plain>
-<text x="33.02" y="78.74" size="1.778" layer="51">Pro mini</text>
+<text x="33.02" y="78.74" size="1.778" layer="51">Pro mini 3v3 8MHz, atmega328</text>
 <rectangle x1="31.75" y1="59.69" x2="64.77" y2="77.47" layer="51"/>
 <text x="64.77" y="53.34" size="1.778" layer="51">JST 2pin skt</text>
 <text x="67.31" y="68.58" size="1.778" layer="51">Leave room for FTDI serial lead here</text>
@@ -70,6 +70,7 @@
 <text x="38.1" y="63.5" size="1.778" layer="18" rot="R90">12</text>
 <text x="53.34" y="63.5" size="1.778" layer="18" rot="R90">vcc</text>
 <text x="58.42" y="63.5" size="1.778" layer="18" rot="R90">gnd</text>
+<text x="64.77" y="49.53" size="1.778" layer="51">3-5V in</text>
 </plain>
 <libraries>
 <library name="switch">
