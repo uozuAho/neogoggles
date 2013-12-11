@@ -25,7 +25,8 @@ static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 31, TOP_LEFT);
 static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 15, TOP_RIGHT);
 
 static Background bg;
-static ColourController bg_colour_control = ColourController(bg.colour);
+static ColourController bg_colour_control =
+    ColourController(bg.colour, ColourController::Effect_Test);
 
 
 //--------------------------------------------------------------
@@ -36,7 +37,7 @@ void setup()
     pixels.begin();
 
     PixelBuf& px = pixels.getPixelBuf();
-    px.setMaxBrightness(20);
+    px.setMaxBrightness(10);
 
     bg.brightness = 255;
 }
@@ -47,6 +48,4 @@ void loop()
     left_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     right_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     pixels.show();
-
-    delay(33);
 }

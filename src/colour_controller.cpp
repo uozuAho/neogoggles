@@ -1,12 +1,10 @@
 #include "colour_controller.h"
 
 
-#define UPDATE_PERIOD_MS        20
-
-
-ColourController::ColourController(Pixel::ColourType& target) :
+ColourController::ColourController(Pixel::ColourType& target, EffectType effect) :
     target(target),
-    u16_speed(1000)
+    effect(effect),
+    u16_speed(0xffff - 1)
 {
 
 }
@@ -14,11 +12,21 @@ ColourController::ColourController(Pixel::ColourType& target) :
 void ColourController::vUpdate(unsigned long time_ms)
 {
     static unsigned long last_time = 0;
+    uint16_t update_period_ms = 0xffff - u16_speed;
+    if (!update_period_ms)
+        update_period_ms = 1;
 
-    if ((time_ms - last_time) >= UPDATE_PERIOD_MS)
+    if ((time_ms - last_time) >= update_period_ms)
     {
         last_time = time_ms;
-        vEffect1();
+        switch (effect)
+        {
+        case Effect_Test:
+            vEffect1();
+            break;
+        default:
+            break;
+        }
     }
 }
 

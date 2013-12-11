@@ -1,5 +1,5 @@
 #----------------------------------------
-# C ignores
+# C
 
 # Compiled Object files
 *.slo
@@ -16,7 +16,7 @@
 *.a
 
 #----------------------------------------
-# python ignores
+# python
 
 *.py[cod]
 
@@ -53,6 +53,11 @@ nosetests.xml
 .pydevproject
 
 #----------------------------------------
-# doit ignores
+# doit
 
 .doit.db
+
+#----------------------------------------
+# eagle
+
+*.b#*

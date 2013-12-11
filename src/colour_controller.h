@@ -6,17 +6,23 @@
 class ColourController
 {
 public:
-    ColourController(Pixel::ColourType& target);
+    typedef enum
+    {
+        Effect_Test,
+        Effect_Something
+
+    } EffectType;
+
+    ColourController(Pixel::ColourType& target, EffectType);
 
     void vUpdate(unsigned long time_ms);
 
 private:
-    void vEffect1();
-
-    Pixel::ColourType set_colour1;
-    Pixel::ColourType set_colour2;
     Pixel::ColourType& target;
+    EffectType effect;
     uint16_t u16_speed;
+
+    void vEffect1();
 };
 
 #endif // COLOUR_CONTROLLER_H
