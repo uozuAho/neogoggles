@@ -15,6 +15,7 @@ Adafruit_NeoPixel pixels =
     Adafruit_NeoPixel(32, NEOPIX_DATA_PIN, NEO_GRB + NEO_KHZ800);
     
 bool spin_this_way = false;
+int brightness = 0;
 
 // ---------------------------
 // functions
@@ -27,23 +28,17 @@ void toggleSpinDirection()
       spin_this_way = true;
 }
 
-void setup()
+void increaseBrightness()
 {
-    // LED
-    pinMode(LED_PIN, OUTPUT);
-    // button
-    pinMode(BUTTON_LOW_DRIVE_PIN, OUTPUT);
-    digitalWrite(BUTTON_LOW_DRIVE_PIN, LOW);
-    pinMode(BUTTON_INPUT_PIN, INPUT_PULLUP);
-
-    regCallback_onButtonPressed(toggleSpinDirection);
-    pixels.begin();
+  brightness += 10;
 }
 
-void loop()
+// call this in loop() for a spinning LED
+// effect. button presses change the 
+// spin direction
+void spinTestCycle()
 {
     static int i = 0;
-    Button_vService();
     // clear current pixel
     pixels.setPixelColor(i, 0, 0, 0);
     
@@ -56,4 +51,35 @@ void loop()
     pixels.show();
     
     delay(30);
+}
+
+// call this in loop to test brightness. 
+// WARNING: gets very bright, no upper limit!
+// I reckon 20's the brightest you'd ever want
+// to go if you're anywhere near these goggles :)
+void brightnessTestCycle()
+{
+  int i = 0;
+  for (; i < 32; i++)
+    pixels.setPixelColor(i, brightness, brightness, brightness);
+  pixels.show();
+}
+
+void setup()
+{
+    // LED
+    pinMode(LED_PIN, OUTPUT);
+    // button
+    pinMode(BUTTON_LOW_DRIVE_PIN, OUTPUT);
+    digitalWrite(BUTTON_LOW_DRIVE_PIN, LOW);
+    pinMode(BUTTON_INPUT_PIN, INPUT_PULLUP);
+
+    regCallback_onButtonPressed(increaseBrightness);
+    pixels.begin();
+}
+
+void loop()
+{
+    Button_vService();
+    brightnessTestCycle();
 }
