@@ -9,7 +9,14 @@
 
 #define PIXELS_PER_EYE              16
 #define NUM_PIXELS                  PIXELS_PER_EYE * 2
-#define NEO_OUTPUT_PIN              0
+
+#ifdef UNO_HARDWARE
+    #define NEO_OUTPUT_PIN              0
+#elif defined PRO_MINI_8MHZ_HARDWARE
+    #define NEO_OUTPUT_PIN              10
+#else
+    #error "Unknown hardware"
+#endif
 
 #define TOP_RIGHT                   12
 #define TOP_LEFT                    20

@@ -4,7 +4,7 @@ import sys
 from doit.tools import create_folder
 
 sys.path.append('dependencies/doit_helpers')
-from doit_helpers import arduino_utils
+from doit_helpers.arduino import env as arduino_env
 from doit_helpers import file_utils
 from doit_helpers import gcc_utils
 
@@ -21,9 +21,12 @@ OBJ_DIR = os.path.join(BUILD_DIR, 'obj')
 
 ARDUINO_ROOT = 'D:\\programs_win\\arduino-1.0.5'
 
-ARDUINO_ENV = arduino_utils.ArduinoEnv(PROJECT_NAME, ARDUINO_ROOT, BUILD_DIR)
+# ARDUINO_HARDWARE = 'uno'
+ARDUINO_HARDWARE = 'pro_mini_8mhz'
 
-SERIAL_PORT = 'COM5'
+ARDUINO_ENV = arduino_env.ArduinoEnv(PROJECT_NAME, ARDUINO_ROOT, BUILD_DIR, ARDUINO_HARDWARE)
+
+SERIAL_PORT = 'COM11'
 
 SOURCE_DIRS = [
     'src',
@@ -35,6 +38,13 @@ INCLUDE_DIRS = [
     os.path.join('dependencies', 'neopixel')
 ]
 INCLUDE_DIRS += ARDUINO_ENV.cincludes
+
+if ARDUINO_HARDWARE == 'uno':
+    C_DEFS = ARDUINO_ENV.cdefs + ['UNO_HARDWARE']
+    CPP_DEFS = ARDUINO_ENV.cdefs + ['UNO_HARDWARE']
+elif ARDUINO_HARDWARE == 'pro_mini_8mhz':
+    C_DEFS = ARDUINO_ENV.cdefs + ['PRO_MINI_8MHZ_HARDWARE']
+    CPP_DEFS = ARDUINO_ENV.cdefs + ['PRO_MINI_8MHZ_HARDWARE']
 
 
 # ---------------------------------------------------------------------
@@ -76,7 +86,7 @@ def get_source_dependencies(source):
 def get_c_compile_command_str(source, obj):
     return gcc_utils.get_compile_cmd_str(source, obj,
                                          compiler=ARDUINO_ENV.c_compiler,
-                                         defs=ARDUINO_ENV.cdefs,
+                                         defs=C_DEFS,
                                          includes=INCLUDE_DIRS,
                                          flags=ARDUINO_ENV.cflags)
 
@@ -84,7 +94,7 @@ def get_c_compile_command_str(source, obj):
 def get_cpp_compile_command_str(source, obj):
     return gcc_utils.get_compile_cmd_str(source, obj,
                                          compiler=ARDUINO_ENV.cpp_compiler,
-                                         defs=ARDUINO_ENV.cppdefs,
+                                         defs=CPP_DEFS,
                                          includes=INCLUDE_DIRS,
                                          flags=ARDUINO_ENV.cppflags)
 
