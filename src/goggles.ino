@@ -1,25 +1,11 @@
 #include <Adafruit_NeoPixel.h>
-#include "ring_view.h"
-#include "spot_model.h"
+
 #include "background_model.h"
 #include "colour_controller.h"
-
-//--------------------------------------------------------------
-// constants
-
-#define PIXELS_PER_EYE              16
-#define NUM_PIXELS                  PIXELS_PER_EYE * 2
-
-#ifdef UNO_HARDWARE
-    #define NEO_OUTPUT_PIN              0
-#elif defined PRO_MINI_8MHZ_HARDWARE
-    #define NEO_OUTPUT_PIN              10
-#else
-    #error "Unknown hardware"
-#endif
-
-#define TOP_RIGHT                   12
-#define TOP_LEFT                    20
+#include "hardware_config.h"
+#include "push_button.h"
+#include "ring_view.h"
+#include "spot_model.h"
 
 
 //--------------------------------------------------------------
@@ -35,23 +21,39 @@ static Background bg;
 static ColourController bg_colour_control =
     ColourController(bg.colour, ColourController::Effect_Test);
 
+static bool b_effects_paused = false;
+
 
 //--------------------------------------------------------------
 // functions
 
+static void vToggleEffectPaused()
+{
+    if (b_effects_paused)
+        b_effects_paused = false;
+    else
+        b_effects_paused = true;
+}
+
 void setup()
 {
-    pixels.begin();
+    pinMode(BUTTON_LOW_DRIVE_PIN, OUTPUT);
+    digitalWrite(BUTTON_LOW_DRIVE_PIN, LOW);
+    pinMode(BUTTON_INPUT_PIN, INPUT_PULLUP);
 
+    pixels.begin();
     PixelBuf& px = pixels.getPixelBuf();
     px.setMaxBrightness(10);
+    bg.brightness = 100;
 
-    bg.brightness = 255;
+    Button_vRegisterCallback_buttonPressed(vToggleEffectPaused);
 }
 
 void loop()
 {
-    bg_colour_control.vUpdate(millis());
+    Button_vService();
+    if (b_effects_paused == false)
+        bg_colour_control.vUpdate(millis());
     left_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     right_eye.vRenderBackground(bg, RingView::EXCLUSIVE);
     pixels.show();

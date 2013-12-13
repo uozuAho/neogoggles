@@ -4,7 +4,7 @@
 ColourController::ColourController(Pixel::ColourType& target, EffectType effect) :
     target(target),
     effect(effect),
-    u16_speed(0xffff - 1)
+    u16_speed(0xffff - 10)
 {
 
 }
