@@ -9,13 +9,13 @@
 class RingView
 {
 public:
-    RingView(PixelBuf& target, uint8_t pixel_start, uint8_t pixel_end,
-             uint8_t pixel_top);
+    RingView(PixelBuf& target, uint16_t pixel_start, uint16_t num_pixels,
+             uint16_t pixel_top);
 
     typedef enum
     {
-        EXCLUSIVE,
-        ADDITIVE,
+        RenderMode_Replace,
+        RenderMode_Add,
 
     } RenderMode;
 
@@ -25,9 +25,9 @@ public:
 
 private:
     PixelBuf& pixel_buf;
-    uint8_t u8_pixel_start;
-    uint8_t u8_pixel_end;
-    uint8_t u8_pixel_top;
+    uint16_t u16_pixel_start;
+    uint16_t u16_num_pixels;
+    uint16_t u16_pixel_top;
 };
 
 #endif // RING_VIEW_H
