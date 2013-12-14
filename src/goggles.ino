@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "background_model.h"
-#include "colour_controller.h"
+#include "test_colour_controller.h"
 #include "hardware_config.h"
 #include "push_button.h"
 #include "ring_view.h"
@@ -18,8 +18,7 @@ static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 31, TOP_LEFT);
 static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 15, TOP_RIGHT);
 
 static Background bg;
-static ColourController bg_colour_control =
-    ColourController(bg.colour, ColourController::Effect_Test);
+static TestColourController bg_colour_control = TestColourController(bg.colour);
 
 static bool b_effects_paused = false;
 
