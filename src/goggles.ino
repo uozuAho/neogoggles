@@ -1,13 +1,15 @@
+/** Example of using multiple pixel buffers */
+
 #include <Adafruit_NeoPixel.h>
 
-#include "background_model.h"
-#include "fader.h"
+#include "pixel.h"
 #include "hardware_config.h"
-#include "push_button.h"
-#include "ring_view.h"
-#include "spot_model.h"
-#include "test_colour_controller.h"
 
+
+//--------------------------------------------------------------
+// constants
+
+#define BAR_WIDTH  5
 
 //--------------------------------------------------------------
 // data
@@ -15,52 +17,61 @@
 static Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, NEO_OUTPUT_PIN,
                                                     NEO_GRB + NEO_KHZ800);
 
-static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 31, TOP_LEFT);
-static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 15, TOP_RIGHT);
+static PixelBuf& display_buf = pixels.getPixelBuf();
 
-static Fader fader = Fader(pixels.getPixelBuf(), 1, 1, 1);
-
-static bool b_fader_on = true;
-
-static uint8_t pixel_generation_rate = 20;
-
+static PixelBuf draw_buf_1 = PixelBuf(NUM_PIXELS);
+static PixelBuf draw_buf_2 = PixelBuf(NUM_PIXELS);
 
 //--------------------------------------------------------------
 // functions
 
-static void vIncreasePixelGenerationRate()
+static void vDrawBar(PixelBuf& buf, uint8_t start, uint8_t len,
+                     Pixel::ColourType& col)
 {
-    pixel_generation_rate += 10;
-}
-
-static void vToggleFaderOnOff()
-{
-    if (b_fader_on)
-        b_fader_on = false;
-    else
-        b_fader_on = true;
-}
-
-static void vSetRandomPixelOn()
-{
-    PixelBuf& px = pixels.getPixelBuf();
-    uint16_t pixel_num = random(0, NUM_PIXELS);
-    px.setPixelColor(pixel_num, 20, 20, 20);
-}
-
-static void vRandomPixelGenerator()
-{
-    static unsigned long last_time_ms = 0;
-
-    if (millis() - last_time_ms > 10)
+    if (start < buf.num_pixels)
     {
-        last_time_ms = millis();
-        if (random(256) < pixel_generation_rate)
+        uint8_t i = 0;
+        for (; i < len; i++)
         {
-            vSetRandomPixelOn();
+            buf.setPixelColor(start++, col.u8_r, col.u8_g, col.u8_b);
+            if (start == buf.num_pixels)
+                start = 0;
         }
     }
 }
+
+static void vUpdateBar1()
+{
+    static unsigned long last_time_ms = 0;
+    static uint8_t bar_pos = 0;
+    static Pixel::ColourType bar_colour = {20,0,0,0};
+
+    if (millis() - last_time_ms > 200)
+    {
+        last_time_ms = millis();
+        draw_buf_1.clear();
+        vDrawBar(draw_buf_1, bar_pos++, BAR_WIDTH, bar_colour);
+        if (bar_pos == draw_buf_1.num_pixels)
+            bar_pos = 0;
+    }
+}
+
+static void vUpdateBar2()
+{
+    static unsigned long last_time_ms = 0;
+    static uint8_t bar_pos = 16;
+    static Pixel::ColourType bar_colour = {0,0,20,0};
+
+    if (millis() - last_time_ms > 80)
+    {
+        last_time_ms = millis();
+        draw_buf_2.clear();
+        vDrawBar(draw_buf_2, bar_pos++, BAR_WIDTH, bar_colour);
+        if (bar_pos == draw_buf_2.num_pixels)
+            bar_pos = 0;
+    }
+}
+
 
 void setup()
 {
@@ -69,18 +80,15 @@ void setup()
     pinMode(BUTTON_INPUT_PIN, INPUT_PULLUP);
 
     pixels.begin();
-    PixelBuf& px = pixels.getPixelBuf();
-    px.setMaxBrightness(20);
-
-    Button_vRegisterCallback_buttonPressed(vIncreasePixelGenerationRate);
-    randomSeed(analogRead(0));
+    display_buf.setMaxBrightness(20);
 }
 
 void loop()
 {
-    Button_vService();
-    vRandomPixelGenerator();
-    if (b_fader_on)
-        fader.vUpdate(millis());
+    vUpdateBar1();
+    vUpdateBar2();
+    display_buf.clear();
+    display_buf.addBuf(draw_buf_1);
+    display_buf.addBuf(draw_buf_2);
     pixels.show();
 }
