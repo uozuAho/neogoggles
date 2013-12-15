@@ -14,37 +14,65 @@ static Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, NEO_OUTPUT_PIN,
 static RingView left_eye =  RingView(pixels.getPixelBuf(), 16, 16, TOP_LEFT);
 static RingView right_eye = RingView(pixels.getPixelBuf(), 0, 16, TOP_RIGHT);
 
-Spot spot1;
-Spot spot2;
-
+Background bg;
 
 //--------------------------------------------------------------
 // functions
 
-static void vUpdateSpot1()
+void vSetRandomBgColour()
 {
-    static unsigned long last_time = 0;
-    if (millis() - last_time > 400)
-    {
-        last_time = millis();
-        spot1.u16_pos += 4096;
-    }
+    bg.colour.u8_r = random(256);
+    bg.colour.u8_g = random(256);
+    bg.colour.u8_b = random(256);
 }
 
-static void vUpdateSpot2()
+enum PulseState
+{
+    BRIGHTEN,
+    DARKEN,
+    PAUSE
+};
+
+void vPulseRandomBgColour()
 {
     static unsigned long last_time = 0;
+
     if (millis() - last_time > 50)
     {
+        static PulseState state = BRIGHTEN;
         last_time = millis();
-        spot2.u16_pos += 4096;
-    }
-}
 
-void vUpdateSpots()
-{
-    vUpdateSpot1();
-    vUpdateSpot2();
+        switch(state)
+        {
+        case BRIGHTEN:
+            bg.brightness += 3;
+            if (bg.brightness >= 15)
+                state = DARKEN;
+            break;
+        case DARKEN:
+            if (bg.brightness > 1)
+                bg.brightness--;
+            else
+            {
+                state = PAUSE;
+            }
+            break;
+        case PAUSE:
+        {
+            static int pause_counter = 0;
+            if (pause_counter++ > 50)
+            {
+                pause_counter = 0;
+                state = BRIGHTEN;
+                vSetRandomBgColour();
+            }
+            break;
+        }
+        default:
+            break;
+        }
+
+    }
 }
 
 void setup()
@@ -57,27 +85,14 @@ void setup()
     PixelBuf& px = pixels.getPixelBuf();
     px.setMaxBrightness(20);
 
-    // init spots
-    spot1.u16_pos = 0;
-    spot1.u16_width = (0xffff / 4) * 3;
-    spot1.colour.u8_r = 20;
-
-    spot2.u16_pos = 1 << 15;
-    spot2.u16_width = 4096 * 2;
-    spot2.colour.u8_b = 20;
+    randomSeed(analogRead(0));
+    vSetRandomBgColour();
 }
 
 void loop()
 {
-    vUpdateSpots();
-
-    left_eye.vClear();
-    left_eye.vRenderSpot(spot1, RingView::RenderMode_Replace);
-    left_eye.vRenderSpot(spot2, RingView::RenderMode_Replace);
-
-    right_eye.vClear();
-    right_eye.vRenderSpot(spot1, RingView::RenderMode_Add);
-    right_eye.vRenderSpot(spot2, RingView::RenderMode_Add);
-
+    vPulseRandomBgColour();
+    left_eye.vRenderBackground(bg);
+    right_eye.vRenderBackground(bg);
     pixels.show();
 }

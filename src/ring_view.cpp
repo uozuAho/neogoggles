@@ -18,6 +18,9 @@ void RingView::vClear()
 
 void RingView::vRenderSpot(Spot& spot, RenderMode render_mode)
 {
+    // spot start pixel = first led + ((position - width / 2) * num_pixels / 2^16
+    // TODO: num_pixels is assumed to be 16 here. This class should probably
+    // be RingView16 rather than trying to support arbitrary numbers of pixels
     uint16_t spot_start_px = u16_pixel_start +
         ((spot.u16_pos - (spot.u16_width >> 1)) >> 12);
     uint16_t spot_len = spot.u16_width >> 12;
@@ -41,15 +44,13 @@ void RingView::vRenderBackground(Background& bg, RenderMode render_mode)
     int i = u16_pixel_start;
     Pixel::ColourType colour = bg.colour;
 
-    pixel_buf.clearRange(u16_pixel_start, u16_num_pixels);
-
     if (bg.brightness < 0xff)
     {
         colour.u8_r = (((uint16_t)bg.brightness * colour.u8_r) >> 8);
         colour.u8_g = (((uint16_t)bg.brightness * colour.u8_g) >> 8);
         colour.u8_b = (((uint16_t)bg.brightness * colour.u8_b) >> 8);
     }
-    for (; i <= u16_num_pixels; i++)
+    for (; i < (u16_pixel_start + u16_num_pixels); i++)
     {
         pixel_buf.setPixelColor(i, colour.u8_r, colour.u8_g, colour.u8_b);
     }

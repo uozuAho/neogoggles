@@ -22,8 +22,8 @@ public:
     void vClear(void);
 
     // Model renderers
-    void vRenderSpot(Spot&, RenderMode);
-    void vRenderBackground(Background&, RenderMode);
+    void vRenderSpot(Spot&, RenderMode = RenderMode_Add);
+    void vRenderBackground(Background&, RenderMode = RenderMode_Add);
 
 private:
     PixelBuf& pixel_buf;
