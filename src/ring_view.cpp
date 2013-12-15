@@ -11,12 +11,29 @@ RingView::RingView(PixelBuf& target, uint16_t pixel_start, uint16_t num_pixels,
 {
 }
 
+void RingView::vClear()
+{
+    pixel_buf.clearRange(u16_pixel_start, u16_num_pixels);
+}
+
 void RingView::vRenderSpot(Spot& spot, RenderMode render_mode)
 {
-    uint8_t pos = u16_pixel_start + (spot.u16_pos >> 8) / 16;
-    pixel_buf.clearRange(u16_pixel_start, u16_num_pixels);
-    pixel_buf.setPixelColor(pos, spot.colour.u8_r, spot.colour.u8_g,
-        spot.colour.u8_b);
+    uint16_t spot_start_px = u16_pixel_start +
+        ((spot.u16_pos - (spot.u16_width >> 1)) >> 12);
+    uint16_t spot_len = spot.u16_width >> 12;
+
+    uint16_t i = 0;
+    for (; i < spot_len; i++)
+    {
+        if (render_mode == RenderMode_Replace)
+            pixel_buf.setPixelColor(spot_start_px++, spot.colour.u8_r,
+                                    spot.colour.u8_g, spot.colour.u8_b);
+        else if (render_mode == RenderMode_Add)
+            pixel_buf.addPixelColor(spot_start_px++, spot.colour.u8_r,
+                                    spot.colour.u8_g, spot.colour.u8_b);
+        if (spot_start_px == (u16_pixel_start + u16_num_pixels))
+            spot_start_px = u16_pixel_start;
+    }
 }
 
 void RingView::vRenderBackground(Background& bg, RenderMode render_mode)

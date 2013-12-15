@@ -19,6 +19,8 @@ public:
 
     } RenderMode;
 
+    void vClear(void);
+
     // Model renderers
     void vRenderSpot(Spot&, RenderMode);
     void vRenderBackground(Background&, RenderMode);
