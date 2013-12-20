@@ -9,7 +9,7 @@ ThemePowerup::ThemePowerup(Adafruit_NeoPixel& pixels) :
     _state = RANDOM_GEN;
     _fader = new Fader(_display_buf, 1, 1, 1);
     _pixel_generation_rate = 1;
-    _pixel_generation_rate_increase_period = 128;
+    _pixel_generation_rate_increase_period = 100;
     _theme_finished = false;
     _last_update_time = 0;
     _last_genrate_update_time = 0;

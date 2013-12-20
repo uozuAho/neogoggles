@@ -15,6 +15,9 @@ typedef struct
 
 } ColourType;
 
+
+void setRandomColour(ColourType&);
+
 } // end namespace Pixel
 
 #endif // PIXEL_H

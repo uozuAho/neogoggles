@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "hardware_config.h"
+#include "push_button.h"
 #include "themes/theme_runner.h"
 
 
@@ -16,6 +17,11 @@ ThemeRunner theme_runner = ThemeRunner(pixels);
 //--------------------------------------------------------------
 // functions
 
+void _nextTheme()
+{
+    theme_runner.vNextTheme();
+}
+
 void setup()
 {
     pinMode(BUTTON_LOW_DRIVE_PIN, OUTPUT);
@@ -25,16 +31,14 @@ void setup()
     pixels.begin();
     PixelBuf& px = pixels.getPixelBuf();
     px.setMaxBrightness(20);
+
+    Button_vRegisterCallback_buttonPressed(_nextTheme);
+
+    randomSeed(analogRead(0));
 }
 
 void loop()
 {
-    static unsigned long last_time = 0;
+    Button_vService();
     theme_runner.vUpdate(millis());
-
-    if (millis() - last_time > 5000)
-    {
-        last_time = millis();
-        theme_runner.vNextTheme();
-    }
 }
