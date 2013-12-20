@@ -30,6 +30,7 @@ SERIAL_PORT = 'COM11'
 
 SOURCE_DIRS = [
     'src',
+    'src/themes',
     os.path.join('dependencies', 'neopixel')
 ]
 

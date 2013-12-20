@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "hardware_config.h"
-#include "theme_runner.h"
+#include "themes/theme_runner.h"
 
 
 //--------------------------------------------------------------

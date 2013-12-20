@@ -10,7 +10,6 @@ public:
     Theme(Adafruit_NeoPixel& pixels):
         _pixels(pixels),
         _display_buf(pixels.getPixelBuf()),
-        _u32_last_time_ms(0),
         _stop_requested(false)
     {}
 
@@ -29,7 +28,6 @@ public:
 protected:
     Adafruit_NeoPixel& _pixels;
     PixelBuf& _display_buf;
-    uint32_t _u32_last_time_ms;
     bool _stop_requested;
 
 };

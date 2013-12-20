@@ -19,6 +19,7 @@ public:
 
 private:
     uint8_t _u8_tog;
+    uint32_t _u32_last_time_ms;
 };
 
 
@@ -39,6 +40,7 @@ public:
 
 private:
     uint8_t _u8_tog;
+    uint32_t _u32_last_time_ms;
 };
 
 #endif // THEME_TEST_H

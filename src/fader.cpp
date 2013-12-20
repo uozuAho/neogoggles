@@ -3,7 +3,7 @@
 
 void Fader::vUpdate(unsigned long time_ms)
 {
-    if (time_ms - last_time_ms >= 100)
+    if (time_ms - last_time_ms >= 50)
     {
         uint16_t i = 0;
         last_time_ms = time_ms;
