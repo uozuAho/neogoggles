@@ -13,7 +13,7 @@ ThemeRandomBgWithSpinners::ThemeRandomBgWithSpinners(Adafruit_NeoPixel& pixels) 
 
     _left_spot.u16_pos = 0;
     _left_spot.u16_width = 4096;
-    _left_spot_speed = -30;
+    _left_spot_speed = 30;
     _vSetRandomColour(_left_spot.colour);
 
     _right_spot.u16_pos = 0;
@@ -52,19 +52,15 @@ void ThemeRandomBgWithSpinners::vUpdate(uint32_t time_ms)
         {
             _state = PULSE_ON;
             _vSetRandomColour(_bg_colour);
-
-            if (random(256) < 200)
-                _vSetRandomColour(_left_spot.colour);
-
-            if (random(256) < 200)
-                _vSetRandomColour(_right_spot.colour);
+            _vSetRandomColour(_left_spot.colour);
+            _vSetRandomColour(_right_spot.colour);
         }
     }
 
     _left_spot.u16_pos += _left_spot_speed;
     _right_spot.u16_pos += _right_spot_speed;
-    _left_eye->vRenderSpot(_left_spot);
-    _right_eye->vRenderSpot(_right_spot);
+    _left_eye->vRenderSpot(_left_spot, RingView::RenderMode_Replace);
+    _right_eye->vRenderSpot(_right_spot, RingView::RenderMode_Replace);
 
     _pixels.show();
 }

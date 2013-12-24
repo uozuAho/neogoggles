@@ -1,8 +1,0 @@
-todo
-====
-
-- link - add ld flags and dirs to arduino env
-- make sure arduino core dependency checking is working
-- Remove arduino core - get from arduino dir
-- Remove neopixel lib - get from arduino dir
-- Change license to MIT
