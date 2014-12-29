@@ -14,14 +14,14 @@ ThemeColChangeSpinners::ThemeColChangeSpinners(Adafruit_NeoPixel& pixels) :
 
     _left_spot.u16_pos = 0;
     _left_spot.u16_width = 4096;
-    _left_spot_speed = 10;
+    _left_spot_speed = random(-SPEED_MAX, SPEED_MAX);
     _left_spot_speed_target = random(-SPEED_MAX, SPEED_MAX);
     setRandomColour(_left_spot.colour);
     setRandomColour(_colour_target_left);
 
     _right_spot.u16_pos = 0;
     _right_spot.u16_width = 4096;
-    _right_spot_speed = 10;
+    _right_spot_speed = random(-SPEED_MAX, SPEED_MAX);
     _right_spot_speed_target = random(-SPEED_MAX, SPEED_MAX);
     setRandomColour(_right_spot.colour);
     setRandomColour(_colour_target_right);

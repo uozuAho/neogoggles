@@ -1,5 +1,5 @@
-#ifndef THEME_RANDOM_BG_WITH_SPINNERS_H
-#define THEME_RANDOM_BG_WITH_SPINNERS_H
+#ifndef THEME_COL_CHANGE_SPINNERS_H
+#define THEME_COL_CHANGE_SPINNERS_H
 
 #include "fader.h"
 #include "pixel.h"
@@ -38,5 +38,5 @@ private:
     void setRandomColour(Pixel::ColourType& col);
 };
 
-#endif // THEME_RANDOM_BG_WITH_SPINNERS_H
+#endif // THEME_COL_CHANGE_SPINNERS_H
 

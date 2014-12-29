@@ -1,9 +1,11 @@
 #include "theme_christmus.h"
+#include "theme_col_change_spinners.h"
+#include "theme_epilepsy.h"
 #include "theme_runner.h"
 #include "theme_powerup.h"
 #include "theme_random_bg_with_spinners.h"
 
-#define NUM_THEMES      3
+#define NUM_THEMES      4
 
 
 void ThemeRunner::vUpdate(unsigned long time_ms)
@@ -38,17 +40,20 @@ void ThemeRunner::vSwitchTheme(void)
         _theme = new ThemePowerup(_pixels);
         break;
     case 1:
-        _theme = new ThemeRandomBgWithSpinners(_pixels);
+        _theme = new ThemeColChangeSpinners(_pixels);
         break;
     case 2:
-        _theme = new ThemeChristmus(_pixels);
+        _theme = new ThemeRandomBgWithSpinners(_pixels);
+        break;
+    case 3:
+        _theme = new ThemeEpilepsy(_pixels);
         break;
     default:
-        _theme = new ThemeRandomBgWithSpinners(_pixels);
+        _theme = new ThemePowerup(_pixels);
         break;
     }
 
     if (_theme_idx == NUM_THEMES)
-        // don't go to powerup again...
+        // don't go to powerup again
         _theme_idx = 1;
 }
