@@ -19,14 +19,14 @@ BUILD_DIR = 'build'
 
 OBJ_DIR = os.path.join(BUILD_DIR, 'obj')
 
-ARDUINO_ROOT = 'D:\\programs_win\\arduino-1.0.5'
+ARDUINO_ROOT = '/home/uozu/Downloads/arduino-1.0.6'
 
 # ARDUINO_HARDWARE = 'uno'
 ARDUINO_HARDWARE = 'pro_mini_8mhz'
 
 ARDUINO_ENV = arduino_env.ArduinoEnv(PROJECT_NAME, ARDUINO_ROOT, BUILD_DIR, ARDUINO_HARDWARE)
 
-SERIAL_PORT = 'COM11'
+SERIAL_PORT = '/dev/ttyUSB0'
 
 SOURCE_DIRS = [
     'src',

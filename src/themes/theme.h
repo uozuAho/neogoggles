@@ -29,7 +29,6 @@ protected:
     Adafruit_NeoPixel& _pixels;
     PixelBuf& _display_buf;
     bool _stop_requested;
-
 };
 
 

@@ -1,0 +1,1 @@
+- hardware test sketch doesn't work unless NeoPixel lib is installed in Arduino
