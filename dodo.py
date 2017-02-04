@@ -19,7 +19,7 @@ BUILD_DIR = 'build'
 
 OBJ_DIR = os.path.join(BUILD_DIR, 'obj')
 
-ARDUINO_ROOT = '/home/uozu/Downloads/arduino-1.0.6'
+ARDUINO_ROOT = '/home/uozu/uozu/apps/arduino-1.8.1'
 
 # ARDUINO_HARDWARE = 'uno'
 ARDUINO_HARDWARE = 'pro_mini_8mhz'
